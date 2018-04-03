@@ -1,0 +1,18 @@
+---
+title: "MATH 680: Assignment 3"
+author: "Annik Gougeon, David Fleischer"
+date: "Last Update: `r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+header-includes:
+   - \usepackage{amsmath,amsthm,amssymb,mathtools}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newcommand{\R}{\mathbb R}
+\renewcommand{\S}{\mathbb S}
+
+# Question 1
+

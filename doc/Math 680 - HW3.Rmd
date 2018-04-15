@@ -112,7 +112,21 @@ ugly - has jump discontinuities
 ## b)
 Show that, for $\forall x,y \in \mathbb R, u \in \partial f(x), v \in \partial f(y)$
 $$(x-y)^T(u-v) \geq 0.$$
- 
+If $u \in \partial f(x)$, then u is a subgradient of $f(x)$. Therefore, by definition, 
+$$f(y) \geq f(x) + u^T(y-x).$$
+It follows that (result from Stanford's notes)
+$$f(y) \leq f(x) \implies u^T(y-x) \leq 0$$
+Similarly, if $v \in \partial f(y)$, then v is a subgradient of $f(y)$. Therefore,  
+$$f(x) \geq f(y) + v^T(x-y).$$
+It follows that (result from Stanford's notes)
+$$f(x) \leq f(y) \implies v^T(x-y) \leq 0$$
+Therefore, \begin{align*}
+&u^T(y-x) + v^T(x-y) \leq 0 \\
+    &\implies (x-y)^T(v-u) \leq 0 \\ 
+    &\implies (x-y)^T(u-v) \geq 0 \end{align*}
+as desired.
+
+
 # 3. Properties of Lasso
 
 ## 1.

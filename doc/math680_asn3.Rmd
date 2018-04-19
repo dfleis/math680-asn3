@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 \newcommand{\R}{\mathbb R}
 \newcommand{\dom}{\textrm{dom}}
 \newcommand{\prox}{\textrm{prox}}
+\newcommand{\argmin}{\textrm{arg min}}
 
 # Section 1: Subgradients and Proximal Operators
 
@@ -383,25 +384,49 @@ as desired.
 
 # Section 5: Proximal Gradient Descent for Group Lasso
 
-## Question 5.1
+## Question 5.(a)
 
-## Question 5.2
+Consider design matrix $X \in \R^{n\times (p + 1)}$ split in $J$ *groups* such that we may express as
+$$
+  X = \left[{\bf 1} ~ X_{(1)} ~ X_{(2)} ~ \cdots ~ X_{(J)} \right],
+$$
 
-### 5.2.(a)
+where ${\bf 1} = [1, ..., 1] \in \R^n$ and $X_{(j)} \in \R^{n \times p_j}$ for $\sum^J_j p_j = p$. The *group lasso* problem seeks to estimate grouped coefficients $\beta = \left[ \beta_{(0)}, \beta_{(1)}, ..., \beta_{(J)}\right]$ through the minimization problem
+$$
+  \widehat\beta = \underset{\beta \in \R^{p + 1}}{\argmin} \left\{ g(\beta) + h(\beta) \right\},
+$$
 
-### 5.2.(b)
+such that $g$ is a convex and differentiable loss function, and the group-lasso-specific $h$ is defined as
+$$
+  h(\beta) = \lambda \sum^J_{j = 1} w_j \lVert \beta_{(j)} \rVert_2,
+$$
 
-### 5.2.(c)
+for tuning parameter $\lambda > 0$ and weights $w_j > 0$.
 
-### 5.2.(d)
+### 5.(a).1
+
+To derive the proximal operator $\prox_{h, t}(\beta)$ of the group lasso problem
+
+## Question 5.(i)
+
+### 5.(i).(a)
+
+### 5.(i).(b)
+
+### 5.(i).(a)
+
+### 5.(i).(c)
+
+### 5.(i).(d)
 
 ## Question 5.3
 
-### 5.3.(a)
+### 5.3.(i).(a)
 
-### 5.3.(b)
+### 5.3.(i).(b)
 
-### 5.3.(c)
+### 5.3.(i).(c)
+
 
 # Section 6: Practice with KKT Conditions and Duality
 

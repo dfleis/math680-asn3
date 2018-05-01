@@ -126,6 +126,9 @@ Therefore, \begin{align*}
     &\implies (x-y)^T(u-v) \geq 0 \end{align*}
 as desired.
 
+## d)
+We wish to show 
+$$\text{prox}_t(x) = u \iff h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u), \quad \forall y.$$
 
 # 3. Properties of Lasso
 
@@ -152,5 +155,40 @@ This statement is implied by a). Both solutions have the same fitted values,
 $$\frac{1}{2} ||y-X \hat{\beta}||^2_2 = \frac{1}{2} ||y-X \hat{\gamma}||^2_2.$$
 They also attain the same optimal value, $c^*$. This implies that
 $$\lambda ||\hat{\beta}|| = \lambda ||\hat{\gamma}||$$ as desired.  
+
+# 6) Practice with KKT Conditions and Duality
+
+We begin with the usual least squares problem, 
+$$\underset{\beta \in \mathbb R^p}{\text{min}} ||y-X\beta||^2_2.$$
+We begin by noting the primal of this problem is
+$$\underset{v \in \mathbb R^n}{min} \frac{1}{2}||v||^2_2 \quad \text{subject to} \; y=X \beta + v.$$
+We can now write the Lagrangian, 
+$$L(v, \beta, \lambda) = \frac{1}{2}||v||^2_2 +\lambda(y - X \beta - v).$$
+It follows that the first order necessary conditions are
+$$ \frac{\partial L}{\partial u} = v - \lambda = 0$$
+$$ \frac{\partial L}{\partial \beta} = -X\lambda = 0$$
+$$ \frac{\partial L}{\partial \lambda} = y-X\beta - v = 0.$$
+From the first partial derivative, we can see that we can simplify the Lagrangian since
+$$v = \lambda \quad \text{and} \quad v^Tv = v^T\lambda.$$
+We can now rewrite the Lagrangian as \begin{align*}
+L(v, \beta, \lambda) &= \frac{1}{2}||v||^2_2 +\lambda(y - X \beta - v) \\
+    &= \frac{1}{2}||v||^2_2 + \lambda y- \lambda u \\
+    &= \frac{1}{2}||v||^2_2 -v^Ty - ||v||^2_2 \\
+    &= ||y-v||^2_2. \end{align*}
+    
+Therefore, we conclude that the dual of the model can be written as 
+$$\underset{v \in \mathbb R^n}{min} ||y-v||^2_2 \quad \text{subject to} \; X^Tv=0,$$
+as desired. 
+
+
+
+
+
+
+
+
+
+
+
 
 

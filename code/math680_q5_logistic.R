@@ -8,7 +8,7 @@ y_train <- as.numeric(dat_train$trainLabels)
 groups <- dat_group$groupLabelsPerRating
 
 Xc_train <- scale(X_train, scale = F)
-yc_train <- as.numeric(scale(y_train, scale = F))
+yc_train <- y_train #as.numeric(scale(y_train, scale = F))
 Xbar <- attributes(Xc_train)$`scaled:center`
 ybar <- attributes(yc_train)$`scaled:center`
 
@@ -31,7 +31,7 @@ Stilde_groupj <- function(beta_groupj, lambda, t_step, w_groupj) {
 fstar <- 336.207
 lambda <- 5
 t_step <- 1e-4
-max_steps <- 1e3
+max_steps <- 10
 w <- sqrt(table(groups))
 n_groups <- length(w)
 
@@ -54,16 +54,16 @@ for (k in 2:max_steps) {
 }
 
 f <- apply(beta, 1, function(b) {
+  P <- vector(mode = 'numeric', length = length(w))
   for (j in 1:n_groups) {
     group_idx <- which(groups == j)
-    norm_p(b[group_idx], 2)
+    P[j] <- lambda * w[j] * norm_p(b[group_idx], 2)
   }
+  h <- sum(P)
   
-  
-  h <- lambda * sum(w * sapply(group_idx, function(groupj) norm_p(b[groupj], 2)))
-  crossprod(yc - Xc_train %*% b) + h
+  crossprod(yc_train - Xc_train %*% b) + h
 })
 
 
-plot(f - fstar, log = 'xy', type = 'l')
+plot(f - fstar, log = 'x', type = 'l')
 

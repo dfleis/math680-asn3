@@ -12,7 +12,398 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 \newcommand{\R}{\mathbb R}
-\renewcommand{\S}{\mathbb S}
+\newcommand{\dom}{\textrm{dom}}
+\newcommand{\prox}{\textrm{prox}}
 
-# Question 1
+# Section 1: Subgradients and Proximal Operators
+
+## Question 1.1
+
+### 1.1.(i)
+
+Recall that a *subgradient* of $f$ at point $x \in \R^n$ is defined as a vector $g \in \R^n$ satisfying the inequality
+$$
+  f (y) \geq f(x) + g^T (y - x), \quad \forall\,y.
+$$
+
+The *subdifferential* of $f$ at $x$ is the set of all subgradients at $x$
+$$
+  \partial f(x) = \left\{ g \in \R^n ~:~ g \text{ is a subgradient of $f$ at $x$} \right\}.
+$$
+
+Let $g_1, g_2 \in \partial f(x)$ be two subgradients of $f$ at $x$ so that
+\begin{align*}
+  f(y) &\geq f(x) + g_1^T (y - x) \\
+  f(y) &\geq f(x) + g_2^T (y - x).
+\end{align*}
+
+Let $\lambda \in [0, 1]$ and consider the linear combination of the above two inequalities, yielding
+\begin{align*}
+  \lambda f(y) + (1 - \lambda)f(y) &\geq \lambda \left[ f(x) + g_1^T (y - x) \right] + (1 - \lambda) \left[ f(x) + g_2^T (y - x) \right] \\
+  \iff f(y) &\geq f(x) + \left[ \lambda g_1^T + (1 - \lambda) g_2^T \right] (y - x) \\
+  &= f(x) + \left[ \lambda g_1 + (1 - \lambda) g_2 \right]^T (y - x).
+\end{align*}
+
+That is, vector $\lambda g_1 + (1 - \lambda)g_2$ is a valid subgradient of $f$ at $x$ since it satisfies the subgradient inequality. Therefore,
+$$
+  g_1, g_2 \in \partial f(x) \implies \lambda g_1 + (1 - \lambda) g_2 \in \partial f(x), \quad \lambda \in [0, 1]
+$$
+
+which informs us that $\partial f(x)$ is indeed a convex set for all $x \in \dom(f)$. To show that $\partial f(x)$ is a closed set we first note that for fixed $y \in \dom(f)$ the set
+$$
+  H_y = \left\{ g \mid f(y) \geq f(x) + g^T(y - x) \right\} = \left\{g \mid f(y) - f(x) \geq g^T (y - x) \right\} 
+$$
+defines a halfspace $\left\{ z \mid b \geq a^T z \right\}$. It's easy to see that the complement $H^c_y = \left\{ g ~|~ f(y) - f(x) < g^T(y - x) \right\}$ is an open set since, for $a_x < b_x$, $a_x, b_x \in \R$,
+$$
+  \forall\, x \in H^c_y,\;\exists\, (a_x, b_x) \subset H^c_y.
+$$
+
+Therefore, each $H_y$ must be a closed set. Next, note that we may express $\partial f(x)$ as the intersection of all halfspaces $H_y$ over all $y \in \dom(f)$, i.e.,
+\begin{align*}
+  \partial f(x) &= \left\{g \mid f(y) \geq f(x) - g^T(y - x),~\forall\,y \in \dom(f) \right\} \\
+  &= \bigcap_{y \in \dom(f)} \left\{ g \mid f(y) \geq f(x) - g^T(y - x) \right\}.
+\end{align*}
+
+Recall that a (potentially uncountable) intersection of closed sets is closed. Therefore, $\partial f(x)$ is indeed a closed set, as desired.
+
+### 1.1.(ii)
+
+Note that $f$ is differentiable for all $x \ne 0$. Therefore, the subgradient of $f$ at $x$ is simply the gradient given by
+$$
+  \nabla f = \frac{x}{\|x\|_2}.
+$$
+
+However, if $x = 0$, we apply the definition of the subgradient
+\begin{align*}
+  \partial f(0) &= \left\{ z \mid f(y) \geq f(0) + z^T(y - 0),~\forall\,y \in \dom(f) \right\} \\
+  &= \left\{ z \mid \| y \|_2 \geq z^Ty,~\forall\,y \in \dom(f) \right\} \\
+  &= \left\{ z \mid 1 \geq \|z\|_2 \right\}.
+\end{align*}
+
+Thus,
+\begin{equation*}
+\partial f(x) = 
+  \begin{cases}
+    \frac{x}{\|x\|_2} & \text{if $x \ne 0$} \\
+    \left\{ z \mid \|z\|_2 \leq 1 \right\} & \text{if $x = 0$,}
+  \end{cases}
+\end{equation*}
+
+as desired. 
+
+### 1.1.(iii)
+
+Let $p, q > 0$ be conjugates so that $\frac{1}{p} + \frac{1}{q} = 1$. Then, we can express the $p$-norm through the $q$-norm via the relationship
+$$
+\|x\|_p = \max_{\|z\|_q \leq 1} z^T x.
+$$
+
+To prove Holder's inequality we define vectors $z$ and $w$ such that
+$$
+  z = \frac{x}{\|x\|_p} \quad \text{and} \quad w = \frac{y}{\|y\|_q}.
+$$
+
+Hence, by Young's inequality,
+$$
+  \sum_{k} |z_k w_k| \leq \sum_{k} \left( \frac{|z_k|^p}{p} + \frac{|w_k|^q}{q} \right).
+$$
+
+However, by construction we find that both $z$ and $w$ have unit length
+$$
+  \|z\|^p_p = 1 \quad \text{and} \quad \|w\|^q_q = 1.
+$$
+
+Thus,
+$$
+  \sum_{k} |z_k w_k| = \sum_{k} \left( \frac{|z_k|^p}{p} + \frac{|w_k|^q}{q} \right) = \frac{1}{p} + \frac{1}{q} = 1
+$$
+
+so
+$$
+  sum_k |z_k w_k| \leq 1.
+$$
+
+That is,
+\begin{align*}
+  \sum_k& \left| \frac{x_k}{\|x\|_p} \cdot \frac{y_k}{\|y\|_q} \right| \leq 1 \\
+  &\iff \frac{1}{\|x\|_p\|y\|_q} \sum_k |x_ky_k| \leq 1 \\
+  &\iff x^T y \leq \|x^Ty\|_1 \leq \|x\|_p\|y\|_q,
+\end{align*}
+
+as desired.
+
+### 1.1.(iv)
+
+We wish to show that $g \in \partial f(x) \iff g = \underset{\|z\|_q \leq 1}{\text{arg max}}~ z^T x$. Let $g \in \partial f(x)$, then
+$$
+  f(y) \geq f(x) + g^T (y - x) \iff \|y\|_p \geq \|x\|_p + g^T(y - x)
+$$
+
+Taking $y = 0$
+$$
+  0 \geq \|x\|_p - g^T x \iff g^T x \geq \|x\|_p.
+$$
+
+Taking $y = 2x$
+$$
+  \|2x\|_p = 2\|x\|_p \geq \|x\|_p + g^T x \iff g^T x \leq \|x\|_p.
+$$
+
+Applying both inequalities we find
+$$
+  g^T x = \|x\|_p \iff g^T x = \max_{\|z\|_q \leq 1} z^T x \iff g = \underset{\|z\|_q \leq 1}{\text{arg max}}~ z^T x.
+$$
+
+Next, suppose $g = \underset{\|z\|_q \leq 1}{\text{arg max}}~ z^T x$. Then, $\|g\|_q \leq 1$ and 
+$$
+  g^T x = \|x\|_p.
+$$
+
+However, recall that $\partial f(x)$ is defined as the set of vectors $z$ satisfying $\|z\|_q \leq 1$ and $z^T x = \|x\|_p$. Therefore,
+$$
+  g \in \partial f(x) = \left\{ z \mid \|z\|_q \leq 1 \text{ and } z^T x = \|x\|_p\right\},
+$$
+
+as desired.
+
+## Question 1.2
+
+NOTE TO SELF: Check http://www.siam.org/books/mo25/mo25_ch6.pdf, check Theorem 6.6 for 1.2.(iii)
+
+### 1.2.(i)
+
+If $h(z) = \frac{1}{2} z^T A z + b^T z + c$, $A \in \mathbb S^n_+$ then our proximal operator is the minimizier 
+$$
+  \prox_{h,t}(x) = \underset{z}{\text{arg min}}~\left\{ \frac{1}{2} \| z - x \|^2_2 + t \left( \frac{1}{2} z^T A z + b^T z + c\right) \right\}.
+$$
+
+Since the proximal objective is continuous with respect to $z$, we may simply take the gradient of our objective to obtain
+\begin{align*}
+ \frac{\partial}{\partial z} \left[ \frac{1}{2}(z - x)^T(z - x)  + t \left( z^T A z + b^T z + c \right) \right] &= \frac{\partial}{\partial z} \left[ \frac{1}{2} z^T z - z^T x + \frac{1}{2} x^T x  + t \left( z^T A z + b^T z + c \right) \right] \\
+ &= z - x + tz^TA + tb
+\end{align*}
+
+Setting this quantity to zero
+$$
+  0 = z - x + tAz + tb \implies z = \left(\mathbb I + tA\right)^{-1} \left(x - tb\right).
+$$
+
+Therefore,
+$$
+  \prox_{h,t}(x) = \left(\mathbb I + tA\right)^{-1} \left(x - tb\right),
+$$
+
+as desired.
+
+### 1.2.(ii)
+
+Taking $h(z) = -\sum^n_{i = 1} \log z_i$, $z \in \R^n_{++}$, we seek to solve the proximal operator
+$$
+  \prox_{h,t}(x) = \underset{z}{\text{arg min}}~\left\{ \frac{1}{2} \| z - x \|^2_2 - t \sum^n_{i = 1} \log z_i \right\}.
+$$
+
+Noting that the objective is once again continuous (on $\R_{++}$), we take the gradient with respect to each $z_i$
+$$
+  \frac{\partial}{\partial z_i} \left[ \frac{1}{2} \|z - x\|^2_2 - t\sum^n_{i = 1} \log z_i \right] = z_i - x_i - \frac{t}{z_i}.
+$$
+
+Setting this equal to zero yields
+$$
+  0 = z_i - x_i - \frac{t}{z_i} \iff z_i = \frac{1}{2} \left(x_i - \sqrt{x_i^2 - 4t}\right).
+$$
+
+Thus, for $i = 1, ..., n$, we find the $i^\text{th}$ component of the proximal operator to be
+$$
+  \left[\prox_{h,t}(x)\right]_i = \frac{1}{2} \left(x_i - \sqrt{x_i^2 - 4t}\right),
+$$
+
+as desired.
+
+### 1.2.(iii)
+
+Consider the proximal operator
+$$
+  \prox_{h,t}(x) = \underset{z}{\text{arg min}}~\left\{ \frac{1}{2} \| z - x \|^2_2 + t\|z\|_2\right\}.
+$$
+
+Recall that we had found the subgradient of $\|z\|_2$ to be
+$$
+  \partial h(z) = 
+  \begin{cases}
+    \frac{z}{\|z\|_2} & \text{if } z \neq 0\\
+    \left\{ g \mid 1 \geq \|g\|_2 \right\} & \text{if } z = 0.
+  \end{cases}
+$$
+
+Omitting the point $z = 0$ we take the derivative of our loss function and set it to zero, 
+$$
+  0 = (z - x) + t\frac{z}{\|z\|_2}.
+$$
+
+To solve this equality we consider the polar transform $x \mapsto (r_x, \theta_x)$ such that
+$$
+  r_x = \|x\|_2
+$$
+
+and
+$$
+  \theta_x = \text{atan}\left(\frac{x_1}{x_2}\right).
+$$
+
+### 1.2.(iv)
+
+Finally, consider $h(z) = t \|z\|_0$ in the proximal operator
+$$
+  \prox_{h,t}(x) = \underset{z}{\text{arg min}} \left\{ \frac{1}{2} \|z - x\|^2_2 + t\|z\|_0 \right\},
+$$
+
+where $\|z\|_0$ denotes the sum of indicators
+$$
+  h(z) = \|z\|_0 = \sum_i \mathbb I_{\left\{z_i \neq 0\right\}}.
+$$
+
+Note that,
+$$
+  t\cdot \mathbb I_{\left\{ z_i \neq 0 \right\}} = 
+  \begin{cases}
+    t, & z_i \neq 0 \\
+    0, & z_i = 0.
+  \end{cases}
+$$
+
+We can express this indicator as the sum $t\cdot\mathbb I(z_i) = t\cdot \mathbb J(z_i) + t$ for $\mathbb J$ given by
+$$
+  t \cdot \mathbb J(z_i) = 
+  \begin{cases}
+    0, & z_i \neq 0 \\
+    -t, & z_i = 0.
+  \end{cases}
+$$
+
+
+# Section 2: Properties of Proximal Mappings and Subgradients
+
+## Question 2.1
+
+## Question 2.2
+
+## Question 2.3
+
+# Section 3: Properties of Lasso
+
+## Question 3.1
+
+First, note that the Lagrangian of the Lasso problem is
+$$
+  \widehat\beta = \underset{\beta \in \R^p}{\text{arg min}} \left\{ \frac{1}{2n} \| {\bf y} - {\bf X}\beta \|^2_2 + \lambda \|\beta\|_1 \right\}
+$$
+
+for centered response vector ${\bf y} \in \R^n$ and centered design matrix ${\bf X} \in \R^{n\times p}$. The solution $\widehat\beta_j$, $j = 1, ..., p$, to the above minimization problem must satisfy the subgradient condition
+$$
+  0 = -\frac{1}{n} \langle X_j, {\bf y} - X_j \widehat\beta_j \rangle + \lambda s_j,
+$$
+
+where $X_j$ denotes the $j^\text{th}$ column/predictor of ${\bf X}$ and $s_j$ is
+$$
+  s_j = \text{sign} \left(\widehat\beta_j \right).
+$$
+
+Therefore, for $\widehat\beta_j = 0$, $j = 1, ..., p$, we find that $\lambda$ must satisfy
+$$
+   0 = -\frac{1}{n} \langle X_j, {\bf y} \rangle + \lambda s_j.
+$$
+
+and so, for $\widehat\beta_j \equiv 0$, we find
+$$
+  \lambda = \left| \frac{1}{n} \langle X_j, {\bf y} \rangle \right|.
+$$
+ 
+Hence, for all $\widehat\beta_j \equiv 0$ we must set
+$$
+  \lambda_{\max} = \max_j \left| \frac{1}{n} \langle X_j, {\bf y} \rangle \right|,
+$$
+
+as desired.
+
+## Question 3.2
+
+### 3.2.(a)
+
+Suppose solutions $\widehat\beta$, $\widehat\gamma$ have common optimum $c^*$ such that
+$$
+  {\bf X}\widehat\beta \neq {\bf X}\widehat\gamma.
+$$
+
+Recall that the squared-loss function $f(a) = \|y - a\|^2_2$ is strictly convex, and that the $\ell_1$ norm is convex, implying that the lasso minimization problem must also be strictly convex. Therefore, the solution set $\mathcal B$ to the lasso problem must also be convex. Thus, by convexity of $\mathcal B$,
+$$
+  \alpha \widehat\beta + (1 - \alpha) \widehat \gamma \in \mathcal B
+$$
+
+for $0 < \alpha < 1$. It follows that
+\begin{align*}
+  \frac{1}{2} \| {\bf y} - {\bf X} \left[ \alpha \widehat\beta + (1 - \alpha) \widehat \gamma \right] \|^2_2 + \lambda \| \alpha \widehat\beta + (1 - \alpha) \widehat\gamma \|_1 &< \alpha \left( \frac{1}{2} \| {\bf y} - {\bf X} \widehat\beta\|^2_2 + \lambda \| \widehat\beta\|_1 \right) + (1 - \alpha) \left( \frac{1}{2} \| {\bf y} - {\bf X} \widehat\gamma\|^2_2 + \lambda \| \widehat\gamma\|_1 \right) \\
+  &= \alpha c^* + (1 - \alpha) c^* \\
+  &= c^*.
+\end{align*}
+
+This implies that the solution of $\alpha \widehat\beta + (1 - \alpha)\widehat\gamma$ attains a new optima $c^\text{new} < c^*$, which is a contradiction. Therefore, we must conclude
+$$
+  {\bf X}\widehat\beta = {\bf X}\widehat\gamma,
+$$
+
+as desired.
+
+### 3.2.(b)
+
+The statement $\|\widehat\beta\|_1 = \|\widehat\gamma\|_1$, for $\lambda > 0$, is directly implied by the above proof. Specifically, since ${\bf X}\widehat\beta = {\bf X}\widehat\gamma$, we must have that both solutions must have the same squared residuals
+$$
+  \| {\bf y} - {\bf X} \widehat\beta \|^2_2 = \|{\bf y} - {\bf X}\widehat\gamma \|^2_2,
+$$
+
+and since both Lagrangian loss functions attain the same optimum $c^*$ we find that the penalty terms must also be equal
+$$
+  \lambda \|\widehat\beta \|_1 = \lambda \| \widehat\gamma\|_1,
+$$
+
+as desired.
+
+# Section 4: Convergence Rates for Proximal Gradient Descent
+
+## Question 4.(a)
+
+## Question 4.(b)
+
+## Question 4.(c)
+
+## Question 4.(d)
+
+## Question 4.(e)
+
+## Question 4.(f)
+
+# Section 5: Proximal Gradient Descent for Group Lasso
+
+## Question 5.1
+
+## Question 5.2
+
+### 5.2.(a)
+
+### 5.2.(b)
+
+### 5.2.(c)
+
+### 5.2.(d)
+
+## Question 5.3
+
+### 5.3.(a)
+
+### 5.3.(b)
+
+### 5.3.(c)
+
+# Section 6: Practice with KKT Conditions and Duality
+
+
 

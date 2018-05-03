@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 \newcommand{\R}{\mathbb R}
 \newcommand{\dom}{\textrm{dom}}
 \newcommand{\prox}{\textrm{prox}}
+\newcommand{\argmin}{\textrm{arg min}}
+
 
 # Section 1: Subgradients and Proximal Operators
 
@@ -73,9 +75,9 @@ $$
   \nabla f = \frac{x}{\|x\|_2}.
 $$
 
-However, if $x = 0$, we apply the definition of the subgradient
+However, at $x = 0$, we apply the definition of the subgradient
 \begin{align*}
-  \partial f(0) &= \left\{ z \mid f(y) \geq f(0) + z^T(y - 0),~\forall\,y \in \dom(f) \right\} \\
+  \partial f(x)\Big]_{x = 0} &= \left\{ z \mid f(y) \geq f(0) + z^T(y - 0),~\forall\,y \in \dom(f) \right\} \\
   &= \left\{ z \mid \| y \|_2 \geq z^Ty,~\forall\,y \in \dom(f) \right\} \\
   &= \left\{ z \mid 1 \geq \|z\|_2 \right\}.
 \end{align*}
@@ -120,7 +122,7 @@ $$
 
 so
 $$
-  sum_k |z_k w_k| \leq 1.
+  \sum_k |z_k w_k| \leq 1.
 $$
 
 That is,
@@ -134,7 +136,7 @@ as desired.
 
 ### 1.1.(iv)
 
-We wish to show that $g \in \partial f(x) \iff g = \underset{\|z\|_q \leq 1}{\text{arg max}}~ z^T x$. Let $g \in \partial f(x)$, then
+We wish to show that $g \in \partial f(x) \iff g = \underset{\|z\|_q \leq 1}{\text{arg max}}~ z^T x$. First, let $g \in \partial f(x)$, then
 $$
   f(y) \geq f(x) + g^T (y - x) \iff \|y\|_p \geq \|x\|_p + g^T(y - x)
 $$
@@ -167,8 +169,6 @@ $$
 as desired.
 
 ## Question 1.2
-
-NOTE TO SELF: Check http://www.siam.org/books/mo25/mo25_ch6.pdf, check Theorem 6.6 for 1.2.(iii)
 
 ### 1.2.(i)
 
@@ -235,20 +235,40 @@ $$
   \end{cases}
 $$
 
-Omitting the point $z = 0$ we take the derivative of our loss function and set it to zero, 
-$$
-  0 = (z - x) + t\frac{z}{\|z\|_2}.
-$$
+Omitting the point $z = 0$ we take the gradient of our proximal objective function and set it to zero,
+\begin{equation*}
+  \frac{z - x}{t} + \frac{z}{\left\lVert z \right\rVert_2} = 0.
+\end{equation*}
 
-To solve this equality we consider the polar transform $x \mapsto (r_x, \theta_x)$ such that
+To solve this we consider the map to polar coordinates $x \mapsto (r_x, \theta_x)$ where 
+\begin{align*}
+  r_x &= \left\lVert x \right\rVert_2 \\
+  \theta_x &= \tan^{-1}\left(\frac{x_1}{x_2}\right).
+\end{align*}
+  
+Note that both terms of the above gradient $\frac{z}{\left\lVert z\right\rVert_2}$ and $x - z$ must have the same angle such that the angle of $\frac{z}{\left\lVert z \right\rVert_2}$ and $z$ must be equation to either the positive or negative angle of $x$. This informs us that $z = ax$, for any $a \in \mathbb R$. Substituting this expression for $z$ into our gradient yields
 $$
-  r_x = \|x\|_2
+\frac{a-1}{t}r_x + \text{sign} (a) = 0
 $$
+and so 
+\begin{equation}
+  a =
+  \begin{cases}
+    \frac{r_x - t}{r_x} & \text{if $r_x > t$} \\
+    0 & \text{else}.
+  \end{cases}
+\end{equation}
 
-and
-$$
-  \theta_x = \text{atan}\left(\frac{x_1}{x_2}\right).
-$$
+Now, if $z = 0$, we see that $r_x \leq t$ and $\frac{1}{t}x \in \{\left\lVert x \right\rVert_2 \leq 1\}$. Therefore, we conclude that
+\begin{equation}
+  \text{prox}_{h,t}(x) = 
+  \begin{cases}
+    x\frac{\left\lVert x \right\rVert_2 - t}{\left\lVert x \right\rVert_2} & \text{if $||x||_2 > t$}\\
+    0 & \text{else},
+  \end{cases}
+\end{equation}
+
+as desired.
 
 ### 1.2.(iv)
 
@@ -283,11 +303,61 @@ $$
 
 # Section 2: Properties of Proximal Mappings and Subgradients
 
-## Question 2.1
+## 2.(b)
 
-## Question 2.2
+We wish to show that, for $\forall x,y \in \mathbb R$, $u \in \partial f(x)$, and $v \in \partial f(y)$,
+$$
+  (x-y)^T(u-v) \geq 0.
+$$
 
-## Question 2.3
+To see this, first note that if $u \in \partial f(x)$ then by definition
+$$
+f(y) \geq f(x) + u^T(y-x).
+$$
+
+It follows that (result from Stanford's notes)
+$$
+f(y) \leq f(x) \implies u^T(y-x) \leq 0
+$$
+
+Similarly, if $v \in \partial f(y)$ then
+$$
+f(x) \geq f(y) + v^T(x-y), 
+$$
+
+so
+$$
+f(x) \leq f(y) \implies v^T(x-y) \leq 0.
+$$
+
+Therefore, putting these two inequalities together,
+\begin{align*}
+&u^T(y-x) + v^T(x-y) \leq 0 \\
+    &\implies (x-y)^T(v-u) \leq 0 \\ 
+    &\implies (x-y)^T(u-v) \geq 0,
+\end{align*}
+as desired.
+
+## 2.(d)
+
+We wish to show 
+$$
+\text{prox}_t(x) = u \iff h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u), \quad \forall y.
+$$
+
+First, recall that 
+$$
+\text{prox}_{t}(x) = \underset{u}{\text{arg min}} \left\{ \frac{1}{2t}||x-u||^2_2 + h(u) \right\}.
+$$
+
+If $h$ is closed and convex, then the proximal mapping exists and is unique for all $x$. That is, it is closed, bounded, and strongly convex. It follows, from these optimality conditions that 
+\begin{align*}
+u = \text{prox}_{t}(x) &\iff x - u \in \partial h(u) \\
+    &\iff h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u) \\
+\end{align*}
+as desired. 
+
+## 2.(e)
 
 # Section 3: Properties of Lasso
 
@@ -370,40 +440,494 @@ as desired.
 # Section 4: Convergence Rates for Proximal Gradient Descent
 
 ## Question 4.(a)
+We wish to show that
+$$
+s = G_t(x^{(i-1)}) - \nabla g(x^{(i-1)})
+$$
+is a subgradient of $h$ evaluated at $x^{(i)}$. Note that $h$ is convex, but not necessarily differentiable, and recall that from Question 2.(d) we had shown that
+$$
+\text{prox}_t(x) = u \iff h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u), \quad \forall y.
+$$
+
+In this case, 
+\begin{align*}
+x^{(i)} &= \text{prox}_{t,h}(x^{(i-1)}-t \nabla g(x^{(i-1)})) \\
+    \iff h(y) &\geq h(x^{(i)}) + \frac{1}{t}(x^{(i-1)} -x^{(i)}-t \nabla g(x^{(i-1)}))^T(y-x^{(i)}) \\
+    &= h(x^{(i)}) + (G_t(x^{(i-1)}) - \nabla g(x^{(i-1)}))^T(y-x^{(i)}) \\
+    &= h(x^{(i)}) + s^T(y-x^{(i)}).
+\end{align*}
+
+That is, $s$ precisely satisfies the definition of a subgradient, $s \in \partial h(x^{(i)})$, as desired. 
 
 ## Question 4.(b)
 
+We wish to derive the following inequality
+$$
+f\left(x^{(i)}\right) \leq f(z) + G_t\left(x^{(i-1)}\right)^T\left(x^{(i-1)} - z\right) - \frac{t}{2}\left\lVert G_t\left(x^{(i-1)}\right)\right\rVert^2_2.
+$$
+
+Recall that our objective function $f$ can be decomposed as
+$$
+f(x) = g(x) + h(x),
+$$
+
+for $g$ convex and differentiable, with $\nabla g$ being Lipschitz, and $h$ convex. Therefore, $f$ must also be convex. Now, by (A4), 
+$$
+g\left(x^{(i)}\right) \leq g\left(x^{(i-1)}\right) - t \nabla g\left(x^{(i-1)}\right)^TG_t \left(x^{(i-1)}\right) + \frac{t}{2}\left\lVert G_t\left( x^{(i-1)}\right) \right\rVert^2_2.
+$$
+
+Furthermore, since $\nabla g$ is Lipschitz, 
+\begin{align*}
+\left\lVert \nabla g(x^{(i-1)}) - g(x^{(i)}) \right\rVert^2_2 &\leq L \left\lVert x^{(i-1)} - x^{(i)} \right\rVert^2_2 \\
+    &= \frac{1}{t} \left\lVert x^{(i-1)} - x^{(i)} \right\rVert^2_2 \\
+    &= \left\lVert G_t(x^{(i-1)}) \right\rVert^2_2. 
+\end{align*}
+
+On the other hand, $s$ is a subgradient of $h$ at $x^{(i)}$, $s \in \partial h\left(x^{(i)}\right)$, so 
+\begin{align*}
+&h\left(x^{(i-1)}\right) \geq h\left(x^{(i)}\right) + s^T\left(x^{(i-1)}-x^{(i)}\right) \\
+    &\iff h\left(x^{(i)}\right) < h\left(x^{(i-1)}\right) + G_t\left(x^{(i-1)}\right) - \nabla g\left(x^{(i-1)} \right)^T \left(x^{(i)}-x^{(i-1)}\right). 
+\end{align*}
+    
+Rearranging the above expressions, it follows that 
+\begin{align*}
+f\left(x^{(i)}\right) &= g\left(x^{(i)}\right) + h\left(x^{(i)}\right) \\
+    &\leq h\left(x^{(i-1)}\right) + g\left(x^{(i-1)}\right) + G_t\left(x^{(i-1)}\right) - \nabla g\left(x^{(i-1)}\right)^T\left(x^{(i)}-x^{(i-1)}\right) - \\
+    &\hphantom{{}={===================}} t\nabla g\left(x^{(i-1)}\right)G_t\left(x^{(i-1)}\right) + \frac{t}{2}\left\lVert G_t\left(x^{(i-1)}\right)\right\rVert^2_2 \\
+    &\leq f(z) + G_t\left(x^{(i-1)}\right)^T\left(x^{(i-1)} - z\right) - \frac{t}{2}\left\lVert G_t\left(x^{(i-1)}\right)\right\rVert^2_2,
+\end{align*}
+
+for $z \in \mathbb R^n$, as desired. 
+
 ## Question 4.(c)
+
+We now wish to show that the sequence $\left\{f(x^{(i)})\right\}$ is nonincreasing for $i = 0, ..., k$. That is, we wish to show, for $i = 1, ..., k$, 
+$$
+f(x^{(i)}) \leq f(x^{(i-1)}).
+$$
+
+We recall the inequality from the previous question,
+$$
+f(x^{(i)}) \leq f(z) + G_t(x^{(i-1)})^T(x^{(i-1)} - z) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2, \quad z \in \mathbb R^n.
+$$
+
+If we let $z = x^{(i-1)}$, we see that 
+\begin{align*}
+f(x^{(i)}) &\leq f(x^{(i-1)}) + G_t(x^{(i-1)})^T(x^{(i-1)} - x^{(i-1)}) - \frac{t}{2}\left\lVert G_t(x^{(i-1)})\right\rVert^2_2 \\
+    &= f(x^{(i-1)}) - \frac{t}{2}\left\lVert G_t(x^{(i-1)})\right\rVert^2_2. 
+\end{align*}
+
+Note that $\frac{t}{2}\left\lVert G_t(x^{(i-1)}) \right\rVert^2_2$ will always be positive unless $G_t(x^{(i-1)}) = 0$. This implies that 
+$$
+f(x^{(i)}) \leq f(x^{(i-1)}), \quad i = 1, ..., k,
+$$
+
+as desired.
 
 ## Question 4.(d)
 
+We will now derive the following inequality
+$$
+f(x^{(i)}) - f(x^*) \leq \frac{1}{2t}\left( \left\lVert x^{(i-1)} - x^*\right\rVert^2_2 - \left\lVert x^{(i)}-x^*\right\rVert^2_2 \right),
+$$
+
+for $x^*$ the minimizer of $f$ (where $f(x^*)$ is assumed to be finite). Using the previous inequality, and the fact that $f(x^{(i)}) \leq f(x^*)$,
+\begin{align*}
+f(x^{(i)}) &\leq f(x^*) + G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - \frac{t}{2}\left\lVert G_t(x^{(i-1)})\right\rVert^2_2 \\
+\iff f(x^{(i)}) - f(x^*) &\leq G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - \frac{t}{2}\left\lVert G_t(x^{(i-1)})\right\rVert^2_2 \\
+\iff f(x^{(i)}) - f(x^*) &\leq \frac{1}{2t} \left( 2t\cdot G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - t^2 \left\lVert G_t(x^{(i-1)}) \right\rVert^2_2 \right) \\
+\iff f(x^{(i)}) - f(x^*) &\leq \frac{1}{2t} \left( 2t \cdot G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - t^2\left\lVert G_t(x^{(i-1)})\right\rVert^2_2 - \left\lVert x^{(i-1)}-x^*\right\rVert^2_2 +\left\lVert x^{(i-1)}-x^*\right\rVert^2_2 \right).
+\end{align*}
+
+Note that 
+$$
+\left\lVert x^{(i-1)}-x^* - tG_t(x^{(i-1)}) \right\rVert^2_2 = \left\lVert x^{(i-1)}-x^*\right\rVert^2_2 - 2t \cdot G_t(x^{(i-1)})^T(x^{(i-1)}-x^*) + t^2\left\lVert G_t(x^{(i-1)})\right\rVert^2_2.
+$$
+
+Therefore
+$$
+f(x^{(i)}) - f(x^*) \leq \frac{1}{2t} \left( \left\lVert x^{(i-1)}-x^*\right\rVert^2_2 - \left\lVert x^{(i-1)} - tG_t(x^{(i-1)}) -x^*\right\rVert^2_2 \right).
+$$
+Furthermore, we have that $G_t(x^{(i-1)}) = \frac{1}{t}(x^{(i-1)} - x^{(i)})$. Hence,
+\begin{align*}
+f(x^{(i)}) - f(x^*) &\leq \frac{1}{2t}  \left( \left\lVert x^{(i-1)}-x^*\right\rVert^2_2 - \left\lVert x^{(i-1)} - t \left(\frac{1}{t}(x^{(i-1)} - x^{(i)}) \right) -x^*\right\rVert^2_2 \right) \\
+  &= \frac{1}{2t} \left( \left\lVert x^{(i-1)}-x^*\right\rVert^2_2 - \left\lVert x^{(i)}-x^*\right\rVert^2_2 \right),
+\end{align*}
+
+as desired. 
+
 ## Question 4.(e)
+
+We will now show
+$$
+f(x^{(k)}) - f(x^*) \leq \frac{1}{2kt} \left\lVert x^{(0)}-x^*\right\rVert^2_2.
+$$
+
+We begin with the result above, summing over all $k$ iterations,
+\begin{align*}
+\sum_{i=1}^k f(x^{(i)}) - f(x^*) &\leq \sum_{i=1}^k \frac{1}{2t} \left( \left\lVert x^{(i-1)}-x^*\right\rVert^2_2 - \left\lVert x^{(i)}-x^*\right\rVert^2_2\right) \\
+    &= \frac{1}{2t} \left( \left\lVert x^{(0)}-x^*\right\rVert^2_2 - \left\lVert x^{(k)}-x^*\right\rVert^2_2\right) \\
+    &\leq \frac{1}{2t} (||x^{(0)}-x^*||^2_2). 
+\end{align*}
+Since the sequence of objection function evaluations is nonincreasing, \begin{align*}
+f(x^{(k)}) - f(x^*) &\leq \frac{1}{k}\sum_{i=1}^k f(x^{(i)}) - f(x^*) \\
+    &\leq \frac{||x^{(0)} - x^* ||^2_2}{2kt} 
+\end{align*}
+as desired. 
 
 ## Question 4.(f)
 
+The method of selecting the step size according to backtracking line search consists of fixing some $0< \beta < 1$ and starting with $t = 1$. Then, at each iteration, while
+$$
+f(x - t \nabla f(x)) > f(x) - \frac{t}{2}|| \nabla f(x)||^2_2,
+$$
+shrink the step size $t = \beta t$. Now, in the context of this problem, 
+$$
+f(x - t \nabla f(x)) > f(x) - \frac{t}{2}|| \nabla f(x)||^2_2
+$$
+
 # Section 5: Proximal Gradient Descent for Group Lasso
 
-## Question 5.1
+## Question 5.(a)
 
-## Question 5.2
+Consider design matrix $X \in \R^{n\times (p + 1)}$ split in $J$ *groups* such that we may express as
+$$
+  X = \left[{\bf 1} ~ X_{(1)} ~ X_{(2)} ~ \cdots ~ X_{(J)} \right],
+$$
 
-### 5.2.(a)
+where ${\bf 1} = [1, ..., 1] \in \R^n$ and $X_{(j)} \in \R^{n \times p_j}$ for $\sum^J_j p_j = p$. The *group lasso* problem seeks to estimate grouped coefficients $\beta = \left[ \beta_{(0)}, \beta_{(1)}, ..., \beta_{(J)}\right]$ through the minimization problem
+$$
+  \widehat\beta = \underset{\beta \in \R^{p + 1}}{\argmin} \left\{ g(\beta) + h(\beta) \right\},
+$$
 
-### 5.2.(b)
+such that $g$ is a convex and differentiable loss function, and the group-lasso-specific $h$ is defined as
+$$
+  h(\beta) = \lambda \sum^J_{j = 1} w_j \left \lVert \beta_{(j)} \right \rVert_2,
+$$
 
-### 5.2.(c)
+for tuning parameter $\lambda > 0$ and weights $w_j > 0$.
 
-### 5.2.(d)
+### 5.(a).1
 
-## Question 5.3
+Recall that for convex, differentiable $g$ and convex $h$, we define the proximal operator of the minimization problem
+$$
+  \min_\beta f(\beta) = \min_x \left\{ g(\beta) + h(\beta) \right\}
+$$
 
-### 5.3.(a)
+to be the mapping
+$$
+  \prox_{h, t}(\beta) = \underset{\beta}\argmin \left\{ \frac{1}{2} \left \lVert \beta - z \right \rVert^2_2 + t \cdot h(z) \right\}.
+$$
 
-### 5.3.(b)
+Therefore, to find the proximal operator for the group lasso problem we seek to solve
+$$
+  \prox_{h, t}(\beta) = \underset{\beta}{\argmin} \left\{ \frac{1}{2} \left\lVert \beta - z \right\rVert^2_2 + \lambda t \sum^J_{j = 1} w_j \left \lVert  z_{(j)} \right \rVert_2\right\}.
+$$
 
-### 5.3.(c)
+Proceeding in the typical manner, we find the subgradient of the corresponding objective function to our proximal operator (with respect to group component $(j)$)
+\begin{align*}
+   \partial_{(j)} \left\{ \frac{1}{2} \left\lVert \beta - z \right\rVert^2_2 + \lambda t \sum^J_{j = 1} w_j \left\lVert  z_{(j)} \right\rVert_2 \right\} &= \beta_{(j)} - z_{(j)} + \lambda t \cdot \partial_{(j)} \left\{ \sum^J_{j = 1} w_j \left\lVert z_{(j)} \right\rVert_2 \right\} \\
+   &= \beta_{(j)} - z_{(j)} + \lambda t w_j \cdot \partial_{(j)} \left\lVert z_{(j)} \right\rVert_2.
+\end{align*}
+
+From question 1.1.(ii) we find the final subgradient to be 
+$$
+  \partial_{(j)} \left\lVert z_{(j)} \right\rVert_2 = 
+  \begin{cases}
+    \frac{z_{(j)}}{\left\lVert z_{(j)} \right\rVert_2} & \text{if } z_{(j)} \neq {\bf 0} \\
+    \left\{ v \,:\, \left\lVert v \right\rVert_2 \leq 1\right\} & \text{if } z_{(j)} = {\bf 0}.
+  \end{cases}
+$$
+
+Therefore, if $z_{(j)} \neq {\bf 0}$ we find the subgradient to be
+$$
+  \partial_{(j)} \left\{ \frac{1}{2} \left\lVert \beta - z \right\rVert^2_2 + \lambda t \sum^J_{j = 1} w_j \left\lVert  z_{(j)} \right\rVert_2 \right\} = \beta_{(j)} - z_{(j)} + \lambda t w_j \frac{z_{(j)}}{\left\lVert z_{(j)} \right\rVert_2}.
+$$
+
+We obtain the proximal operator by setting this quantity to zero, yielding optimum
+\begin{align*}
+  0 &= \beta_{(j)} - z_{(j)} + \lambda t w_j \frac{z_{(j)}}{\left\lVert z_{(j)} \right\rVert_2} \\
+  \iff z_{(j)} &= \left[\widetilde S_{\lambda t} \left(\beta\right) \right]_{(j)},
+\end{align*}
+
+where $\widetilde S$ is the group soft thresholding operator
+$$
+  \left[\widetilde S_{\lambda t}\left(\beta\right) \right]_{(j)} = \begin{cases}
+    \beta_{(j)} - \lambda t w_j \frac{\beta_{(j)}}{\left \lVert \beta_{(j)} \right \rVert_2} & \text{if } \left\lVert \beta_{(j)} \right\rVert_2 > \lambda t \\
+    {\bf 0} & \text{otherwise.}
+  \end{cases}
+$$
+
+Note that in the case where $J = p$ we find $\beta_{(j)} = \beta_j \in \R$, so
+$$
+  \frac{\beta_{(j)}}{\left \lVert \beta_{(j)} \right \rVert_2} = \frac{\beta_j}{\left \lVert \beta_j \right \rVert_2} = \frac{\beta_j}{\left| \beta_j \right|} = \text{sign} \left( \beta_j \right) =: s_j
+$$
+
+Therefore,
+$$
+  \beta_{j} - \lambda t w_j \frac{\beta_{j}}{\left \lVert \beta_{j} \right \rVert_2} = \beta_j - \lambda t w_j s_j.
+$$
+
+So, if we set $w_j \equiv 1$ for all $j$, we obtain
+$$
+ \left[\widetilde S_{\lambda t}\left(\beta\right) \right]_j = 
+ \begin{cases}
+  \beta_j - \lambda t s_j & \text{if } \beta_j > \lambda t \\
+  0 & \text{otherwise,}
+ \end{cases}
+$$
+
+which is precisely the proximal operator for the (ungrouped) lasso problem.
+
+## Question 5.(i)
+
+### 5.(i).(a)
+
+For $g(\beta) = \left \lVert y - X \beta \right \rVert^2_2$ we find the gradient
+\begin{align*}
+  \nabla g(\beta) &= \nabla \left(y - X\beta\right)^T \left( y - X \beta\right) \\
+  &= \nabla \left[ y^T y - 2 \beta^T X^T y + \beta^T X^T X \beta \right] \\
+  &= -X^T y + X^T X \beta,
+\end{align*}
+
+as desired.
+
+### 5.(i).(b)
+
+We load our data
+```{r}
+X <- as.matrix(read.csv("../data/birthwt/X.csv"))
+y <- as.matrix(read.csv("../data/birthwt/y.csv"))
+
+yc <- scale(y, scale = F)
+Xc <- scale(X, scale = F)
+ybar <- attributes(yc)$`scaled:center`
+Xbar <- attributes(Xc)$`scaled:center`
+```
+
+and define some useful functions
+```{r}
+norm_p <- function(v, p) {
+  sum(abs(v)^p)^(1/p)
+}
+grad_g <- function(X, y, b) {
+  -crossprod(X, y - X %*% b)
+}
+Stilde_groupj <- function(beta_groupj, lambda, t_step, w_groupj) {
+  beta_groupj_norm2 <- norm_p(beta_groupj, 2)
+  
+  beta_groupj/beta_groupj_norm2 * 
+    max(beta_groupj_norm2 - lambda * t_step * w_groupj, 0)  
+}
+```
+
+Next, we set some parameters and define the group structure, as well as initialize our solution $\beta^{(0)} = {\bf 0}$
+```{r}
+fstar <- 84.5952
+lambda <- 4
+t_step <- 0.002
+max_steps <- 1e3
+group_idx <- list()
+group_idx[[1]] <- 1:3 # age1, age2, age3
+group_idx[[2]] <- 4:6 # lwt1, lwt2, lwt3
+group_idx[[3]] <- 7:8 # white, black
+group_idx[[4]] <- 9 # smoke
+group_idx[[5]] <- 10:11 # ptl1, ptl2m
+group_idx[[6]] <- 12 # ht
+group_idx[[7]] <- 13 # ui
+group_idx[[8]] <- 14:16 # ftv1, ftv2, ftv3m
+n_groups <- length(group_idx)
+
+w <- sapply(group_idx, function(groupj) sqrt(length(groupj)))
+```
+
+First, we compute the traditional proximal gradient descent algorithm
+```{r}
+beta_init <- rep(0, ncol(Xc))
+beta <- matrix(nrow = max_steps, ncol = length(beta_init))
+beta[1, ] <- beta_init - t_step * grad_g(Xc, yc, beta_init)
+
+for (k in 2:max_steps) {
+  # update step
+  beta[k,] <- beta[k - 1,] - t_step * grad_g(Xc, yc, beta[k - 1,])
+  
+  # proximal step
+  for (j in 1:n_groups) {
+    beta[k, group_idx[[j]]] <- 
+      Stilde_groupj(beta[k,  group_idx[[j]]], lambda, t_step, w[j])
+  }
+}
+
+beta_prox_sol <- beta[max_steps,] # extract solution
+
+f <- apply(beta, 1, function(b) {
+  h <- lambda * sum(w * sapply(group_idx, function(groupj) norm_p(b[groupj], 2)))
+  crossprod(yc - Xc %*% b) + h
+})
+```
+
+Next, we implement the accelerated proximal algorithm
+```{r}
+beta_init_m1 <- rep(0, ncol(Xc))
+beta_init_00 <- rep(0, ncol(Xc))
+
+beta <- matrix(nrow = max_steps + 2, ncol = ncol(Xc))
+beta[1, ] <- beta_init_m1
+beta[2, ] <- beta_init_00
+#beta[1, ] <- beta_init - t_step * grad_g(Xc, yc, beta_init)
+
+for (k in 3:nrow(beta)) {
+  # momentum step
+  v <- beta[k - 1,] + (k - 4)/(k - 1) * (beta[k - 1,] - beta[k - 2,])
+  # update step
+  beta[k,] <- v - t_step * grad_g(Xc, yc, beta[k - 1,])
+  
+  # proximal step
+  for (j in 1:n_groups) {
+    beta[k, group_idx[[j]]] <- 
+      Stilde_groupj(beta[k,  group_idx[[j]]], lambda, t_step, w[j])
+  }
+}
+
+f_acc <- apply(beta, 1, function(b) {
+  h <- lambda * sum(w * sapply(group_idx, function(groupj) norm_p(b[groupj], 2)))
+  crossprod(yc - Xc %*% b) + h
+})
+
+acc_min_idx <- which(f_acc == min(f_acc))
+beta_acc_prox_sol <- beta[acc_min_idx,] # extract solution
+```
+
+Finally, we visualize the results
+```{R, fig.align = 'center', fig.height = 4, fig.width = 5}
+plot(f - fstar, ylim = range(c(f, f_acc) - fstar), 
+     xlab = "Step", ylab = "f - fstar",
+     log = 'xy', type = 'l', lwd = 2)
+lines(f_acc - fstar, col = 'red', lwd = 2)
+legend("topright", legend = c("Prox.", "Acc. Prox."), 
+       lwd = 2, seg.len = 1.5, col = c("black", "red"))
+```
+
+### 5.(i).(c)
+
+We now display the estimated coefficients of both the proximal and accelerated proximal algorithms
+```{r}
+round(beta_prox_sol, 4)
+round(beta_acc_prox_sol, 4)
+```
+
+In both algorithms we see that predictors (7 = `white`, 8 = `black`), (9 = `smoke`), (10 = `ptl1`, 11 = `ptl2`), (12 = `ht`), and (13 = `ui`) are selected, corresponding to groups 3, 4, 5, 6, 7.
+
+### 5.(i).(d)
+
+Using the same framework we now compute the lasso with $\lambda = 0.35$
+```{r}
+#===== LASSO =====#
+lambda <- 0.35
+t_step <- 0.002
+max_steps <- 1e4
+group_idx <- list()
+for (i in 1:ncol(Xc))
+  group_idx[[i]] <- i
+n_groups <- length(group_idx)
+
+w <- sapply(group_idx, function(groupj) sqrt(length(groupj)))
+beta_init <- rep(0, ncol(Xc))
+
+beta_lasso <- matrix(nrow = max_steps, ncol = length(beta_init))
+beta_lasso[1, ] <- beta_init - t_step * grad_g(Xc, yc, beta_init)
+
+for (k in 2:max_steps) {
+  # update step
+  beta_lasso[k,] <- beta_lasso[k - 1,] - t_step * grad_g(Xc, yc, beta_lasso[k - 1,])
+  
+  # proximal step
+  for (j in 1:n_groups) {
+    beta_lasso[k, group_idx[[j]]] <- 
+      Stilde_groupj(beta_lasso[k,  group_idx[[j]]], lambda, t_step, w[j])
+  }
+}
+
+f <- apply(beta_lasso, 1, function(b) {
+  h <- lambda * sum(w * sapply(group_idx, function(groupj) norm_p(b[groupj], 2)))
+  crossprod(yc - Xc %*% b) + h
+})
+```
+
+Comparing the lasso results to the proximal and accelerated proximal results
+```{r}
+round(beta_prox_sol, 4)
+round(beta_acc_prox_sol, 4)
+round(beta_lasso[max_steps,], 4)
+```
+
+We find that the lasso solution does not apply groupwise sparsity, instead setting some predictors to zero in the same group as nonzero predictors.
+
+### 5.3.(i).(a)
+
+\begin{align*}
+  \nabla g(\beta) &= \nabla \left( \sum^n_{i = 1} -y_i X_i\beta + \log\left(1 + \exp\left\{ X_i \beta \right\} \right) \right) \\
+  &= \sum^n_{i = 1} -y_i X_i + \frac{X_i \exp\left\{ X_i\beta \right\}}{ 1 + \exp\left\{ X_i \beta \right\} }
+\end{align*}
+
+### 5.3.(i).(b)
+
+### 5.3.(i).(c)
+
 
 # Section 6: Practice with KKT Conditions and Duality
+
+We begin with the usual least squares problem, 
+$$
+\underset{\beta \in \mathbb R^p}{\text{min}} ||y-X\beta||^2_2.
+$$
+
+Note that the corresponding primal problem is given by
+$$
+\underset{v \in \mathbb R^n}{\min} \frac{1}{2}||v||^2_2 \quad \text{subject to} \; y=X \beta + v.$$
+
+In this form we see that the Lagragian is the function
+$$
+L(v, \beta, \lambda) = \frac{1}{2}||v||^2_2 +\lambda(y - X \beta - v).
+$$
+
+It follows that the first order necessary conditions are
+\begin{align*}
+ 0 &= \frac{\partial L}{\partial v} = v - \lambda \cdot {\bf 1} \\
+ 0 &= \frac{\partial L}{\partial \beta} = -X\lambda \\
+ 0 &= \frac{\partial L}{\partial \lambda} = y-X\beta - v.
+\end{align*}
+
+Note that from these first order conditions we find
+$$v = \lambda \cdot {\bf 1} \quad \text{and} \quad v^Tv = v^T\lambda,$$
+
+permitting us to simplify the Lagrangian as
+\begin{align*}
+L(v, \beta, \lambda) &= \frac{1}{2}||v||^2_2 +\lambda(y - X \beta - v) \\
+    &= \frac{1}{2}||v||^2_2 + \lambda y- \lambda u \\
+    &= \frac{1}{2}||v||^2_2 -v^Ty - ||v||^2_2 \\
+    &= ||y-v||^2_2. 
+\end{align*}
+    
+Therefore, we conclude that the dual problem is given by
+$$
+\underset{v \in \mathbb R^n}{\min} ||y-v||^2_2 \quad \text{subject to} \; X^Tv=0,
+$$
+
+as desired. 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

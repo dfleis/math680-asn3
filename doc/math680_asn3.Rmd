@@ -358,6 +358,32 @@ u = \text{prox}_{t}(x) &\iff x - u \in \partial h(u) \\
 as desired. 
 
 ## 2.(e)
+We will now show that the $\text{prox}_t$ mapping is non-expansive, that is, 
+$$
+||\text{prox}_t(x) -\text{prox}_t(y)||_2 \leq ||x-y||_2, \quad \forall x,y. 
+$$
+We first denote
+$$
+u = \text{prox}_t(x) \quad \text{and} \quad v=\text{prox}_t(y).
+$$
+Then, by definition, 
+$$
+x-u \in \partial f(u) \quad \text{and} \quad y-v \in \partial f(v),
+$$
+where $\partial f$ is monotone. This leads to 
+$$
+\langle x-u - (y-v), u-v \rangle \geq 0
+$$
+$$
+\implies \langle x-y, u-v \rangle \geq ||u-v||^2_2.
+$$
+In other words, 
+$$
+||\text{prox}_t(x) -\text{prox}_t(y)||_2 \leq ||x-y||_2, \quad \forall x,y. 
+$$
+and so $\text{prox}_t$ is non-expansive, as desired. 
+
+
 
 # Section 3: Properties of Lasso
 

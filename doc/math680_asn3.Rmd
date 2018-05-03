@@ -607,10 +607,29 @@ The method of selecting the step size according to backtracking line search cons
 $$
 f(x - t \nabla f(x)) > f(x) - \frac{t}{2}|| \nabla f(x)||^2_2,
 $$
-shrink the step size $t = \beta t$. Now, in the context of this problem, 
+shrink the step size $t = \beta t$. 
+
+We will show that the convergence rate is anagolous to the one above when the step sizes are chosen according to backtracking line search. The equations are the same as before, but we now replace $t$ by $t_{min} = \text{min}_{i=1,...,k}t_i$. It follows that $t_{min} = \text{min}\{1,\frac{\beta}{L}\}$, where $\nabla g$ is Lipschitz, with constant $L>0$. We now define
 $$
-f(x - t \nabla f(x)) > f(x) - \frac{t}{2}|| \nabla f(x)||^2_2
+s_{min} = G_{t_{min}}(x^{(i-1)}) - \nabla g(x^{(i-1)}),
 $$
+where
+$$
+G_{t_{min}}(x^{(i-1)}) = \frac{1}{t_{min}}(x^{(i-1)}-x^{(i)}).
+$$
+It follows that $s_{min} \in \partial h(x^{(i)})$. Furthermore, the following inequality still holds,
+$$
+f\left(x^{(i)}\right) \leq f(z) + G_{t_{min}}\left(x^{(i-1)}\right)^T\left(x^{(i-1)} - z\right) - \frac{t_{min}}{2}\left\lVert G_{t_{min}}\left(x^{(i-1)}\right)\right\rVert^2_2.
+$$
+and therefore the sequence of objective functions defined above is nonincreasing, for $i=0,...,k$. As per part d), 
+$$
+f(x^{(i)}) - f(x^*) \leq \frac{1}{2t_{min}}\left( \left\lVert x^{(i-1)} - x^*\right\rVert^2_2 - \left\lVert x^{(i)}-x^*\right\rVert^2_2 \right).
+$$
+Finally, it follows from the proof in part e), that
+$$
+f(x^{(k)}) - f(x^*) \leq \frac{1}{2kt_{min}} \left\lVert x^{(0)}-x^*\right\rVert^2_2,
+$$
+as desired. We conclude that the convergence rate result is anagolous when the step sizes are chosen according to backtracking line search. 
 
 # Section 5: Proximal Gradient Descent for Group Lasso
 

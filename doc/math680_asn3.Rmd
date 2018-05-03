@@ -865,10 +865,17 @@ We find that the lasso solution does not apply groupwise sparsity, instead setti
 
 ### 5.3.(i).(a)
 
-\begin{align*}
-  \nabla g(\beta) &= \nabla \left( \sum^n_{i = 1} -y_i X_i\beta + \log\left(1 + \exp\left\{ X_i \beta \right\} \right) \right) \\
-  &= \sum^n_{i = 1} -y_i X_i + \frac{X_i \exp\left\{ X_i\beta \right\}}{ 1 + \exp\left\{ X_i \beta \right\} }
-\end{align*}
+The gradient $\nabla g$ is given by the vector
+$$
+  \nabla g(\beta) = \left[ \frac{\partial g}{\partial \beta_1}, ...,  \frac{\partial g}{\partial \beta_p} \right],
+$$
+
+whose $j^\text{th}$ component is the partial derivative with respect to the $j^\text{th}$ coefficient 
+$$
+  \frac{\partial}{\partial \beta_j} g(\beta) = \sum^n_{i = 1} -y_i x_{ij} \beta_j + \sum^n_{i = 1} \frac{x_{ij} e^{X_i\beta}}{1 + e^{X_i\beta}},
+$$
+
+as desired.
 
 ### 5.3.(i).(b)
 

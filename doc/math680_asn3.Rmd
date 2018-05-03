@@ -296,12 +296,12 @@ $$
 
 First, note that the Lagrangian of the Lasso problem is
 $$
-  \widehat\beta = \underset{\beta \in \R^p}{\text{arg min}} \left\{ \frac{1}{2n} \| {\bf y} - {\bf X}\beta \|^2_2 + \lambda \|\beta\|_1 \right\}
+  \widehat\beta = \underset{\beta \in \R^p}{\text{arg min}} \left\{ \frac{1}{2n} \left \lVert {\bf y} - {\bf X}\beta \right \rVert^2_2 + \lambda \left \lVert \beta \right\rVert_1 \right\}
 $$
 
 for centered response vector ${\bf y} \in \R^n$ and centered design matrix ${\bf X} \in \R^{n\times p}$. The solution $\widehat\beta_j$, $j = 1, ..., p$, to the above minimization problem must satisfy the subgradient condition
 $$
-  0 = -\frac{1}{n} \langle X_j, {\bf y} - X_j \widehat\beta_j \rangle + \lambda s_j,
+  0 = -\frac{1}{n} \left\langle X_j, {\bf y} - X_j \widehat\beta_j \right\rangle + \lambda s_j,
 $$
 
 where $X_j$ denotes the $j^\text{th}$ column/predictor of ${\bf X}$ and $s_j$ is
@@ -311,17 +311,17 @@ $$
 
 Therefore, for $\widehat\beta_j = 0$, $j = 1, ..., p$, we find that $\lambda$ must satisfy
 $$
-   0 = -\frac{1}{n} \langle X_j, {\bf y} \rangle + \lambda s_j.
+   0 = -\frac{1}{n} \left\langle X_j, {\bf y} \right\rangle + \lambda s_j.
 $$
 
 and so, for $\widehat\beta_j \equiv 0$, we find
 $$
-  \lambda = \left| \frac{1}{n} \langle X_j, {\bf y} \rangle \right|.
+  \lambda = \left| \frac{1}{n} \left\langle X_j, {\bf y} \right\rangle \right|.
 $$
  
 Hence, for all $\widehat\beta_j \equiv 0$ we must set
 $$
-  \lambda_{\max} = \max_j \left| \frac{1}{n} \langle X_j, {\bf y} \rangle \right|,
+  \lambda_{\max} = \max_j \left| \frac{1}{n} \left\langle X_j, {\bf y} \right \rangle \right|,
 $$
 
 as desired.
@@ -398,20 +398,100 @@ $$
 
 such that $g$ is a convex and differentiable loss function, and the group-lasso-specific $h$ is defined as
 $$
-  h(\beta) = \lambda \sum^J_{j = 1} w_j \lVert \beta_{(j)} \rVert_2,
+  h(\beta) = \lambda \sum^J_{j = 1} w_j \left \lVert \beta_{(j)} \right \rVert_2,
 $$
 
 for tuning parameter $\lambda > 0$ and weights $w_j > 0$.
 
 ### 5.(a).1
 
-To derive the proximal operator $\prox_{h, t}(\beta)$ of the group lasso problem
+Recall that for convex, differentiable $g$ and convex $h$, we define the proximal operator of the minimization problem
+$$
+  \min_\beta f(\beta) = \min_x \left\{ g(\beta) + h(\beta) \right\}
+$$
+
+to be the mapping
+$$
+  \prox_{h, t}(\beta) = \underset{\beta}\argmin \left\{ \frac{1}{2} \left \lVert \beta - z \right \rVert^2_2 + t \cdot h(z) \right\}.
+$$
+
+Therefore, to find the proximal operator for the group lasso problem we seek to solve
+$$
+  \prox_{h, t}(\beta) = \underset{\beta}{\argmin} \left\{ \frac{1}{2} \left\lVert \beta - z \right\rVert^2_2 + \lambda t \sum^J_{j = 1} w_j \left \lVert  z_{(j)} \right \rVert_2\right\}.
+$$
+
+Proceeding in the typical manner, we find the subgradient of the corresponding objective function to our proximal operator (with respect to group component $(j)$)
+\begin{align*}
+   \partial_{(j)} \left\{ \frac{1}{2} \left\lVert \beta - z \right\rVert^2_2 + \lambda t \sum^J_{j = 1} w_j \left\lVert  z_{(j)} \right\rVert_2 \right\} &= \beta_{(j)} - z_{(j)} + \lambda t \cdot \partial_{(j)} \left\{ \sum^J_{j = 1} w_j \left\lVert z_{(j)} \right\rVert_2 \right\} \\
+   &= \beta_{(j)} - z_{(j)} + \lambda t w_j \cdot \partial_{(j)} \left\lVert z_{(j)} \right\rVert_2.
+\end{align*}
+
+From question 1.1.(ii) we find the final subgradient to be 
+$$
+  \partial_{(j)} \left\lVert z_{(j)} \right\rVert_2 = 
+  \begin{cases}
+    \frac{z_{(j)}}{\left\lVert z_{(j)} \right\rVert_2} & \text{if } z_{(j)} \neq {\bf 0} \\
+    \left\{ v \,:\, \left\lVert v \right\rVert_2 \leq 1\right\} & \text{if } z_{(j)} = {\bf 0}.
+  \end{cases}
+$$
+
+Therefore, if $z_{(j)} \neq {\bf 0}$ we find the subgradient to be
+$$
+  \partial_{(j)} \left\{ \frac{1}{2} \left\lVert \beta - z \right\rVert^2_2 + \lambda t \sum^J_{j = 1} w_j \left\lVert  z_{(j)} \right\rVert_2 \right\} = \beta_{(j)} - z_{(j)} + \lambda t w_j \frac{z_{(j)}}{\left\lVert z_{(j)} \right\rVert_2}.
+$$
+
+We obtain the proximal operator by setting this quantity to zero, yielding optimum
+\begin{align*}
+  0 &= \beta_{(j)} - z_{(j)} + \lambda t w_j \frac{z_{(j)}}{\left\lVert z_{(j)} \right\rVert_2} \\
+  \iff z_{(j)} &= \left[\widetilde S_{\lambda t} \left(\beta\right) \right]_{(j)},
+\end{align*}
+
+where $\widetilde S$ is the group soft thresholding operator
+$$
+  \left[\widetilde S_{\lambda t}\left(\beta\right) \right]_{(j)} = \begin{cases}
+    \beta_{(j)} - \lambda t w_j \frac{\beta_{(j)}}{\left \lVert \beta_{(j)} \right \rVert_2} & \text{if } \left\lVert \beta_{(j)} \right\rVert_2 > \lambda t \\
+    {\bf 0} & \text{otherwise.}
+  \end{cases}
+$$
+
+Note that in the case where $J = p$ we find $\beta_{(j)} = \beta_j \in \R$, so
+$$
+  \frac{\beta_{(j)}}{\left \lVert \beta_{(j)} \right \rVert_2} = \frac{\beta_j}{\left \lVert \beta_j \right \rVert_2} = \frac{\beta_j}{\left| \beta_j \right|} = \text{sign} \left( \beta_j \right) =: s_j
+$$
+
+Therefore,
+$$
+  \beta_{j} - \lambda t w_j \frac{\beta_{j}}{\left \lVert \beta_{j} \right \rVert_2} = \beta_j - \lambda t w_j s_j.
+$$
+
+So, if we set $w_j \equiv 1$ for all $j$, we obtain
+$$
+ \left[\widetilde S_{\lambda t}\left(\beta\right) \right]_j = 
+ \begin{cases}
+  \beta_j - \lambda t s_j & \text{if } \beta_j > \lambda t \\
+  0 & \text{otherwise,}
+ \end{cases}
+$$
+
+which is precisely the proximal operator for the (ungrouped) lasso problem.
 
 ## Question 5.(i)
 
 ### 5.(i).(a)
 
+For $g(\beta) = \left \lVert y - X \beta \right \rVert^2_2$ we find the gradient
+\begin{align*}
+  \nabla g(\beta) &= \nabla \left(y - X\beta\right)^T \left( y - X \beta\right) \\
+  &= \nabla \left[ y^T y - 2 \beta^T X^T y + \beta^T X^T X \beta \right] \\
+  &= -X^T y + X^T X \beta,
+\end{align*}
+
+as desired.
+
 ### 5.(i).(b)
+
+```{r}
+```
 
 ### 5.(i).(a)
 
@@ -422,6 +502,11 @@ To derive the proximal operator $\prox_{h, t}(\beta)$ of the group lasso problem
 ## Question 5.3
 
 ### 5.3.(i).(a)
+
+\begin{align*}
+  \nabla g(\beta) &= \nabla \left( \sum^n_{i = 1} -y_i X_i\beta + \log\left(1 + \exp\left\{ X_i \beta \right\} \right) \right) \\
+  &= \sum^n_{i = 1} -y_i X_i + \frac{X_i \exp\left\{ X_i\beta \right\}}{ 1 + \exp\left\{ X_i \beta \right\} }
+\end{align*}
 
 ### 5.3.(i).(b)
 

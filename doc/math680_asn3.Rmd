@@ -872,7 +872,7 @@ $$
 
 whose $j^\text{th}$ component is the partial derivative with respect to the $j^\text{th}$ coefficient 
 $$
-  \frac{\partial}{\partial \beta_j} g(\beta) = \sum^n_{i = 1} -y_i x_{ij} \beta_j + \sum^n_{i = 1} \frac{x_{ij} e^{X_i\beta}}{1 + e^{X_i\beta}},
+  \frac{\partial}{\partial \beta_j} g(\beta) = \sum^n_{i = 1} -y_i x_{ij} + \sum^n_{i = 1} \frac{x_{ij} e^{X_i\beta}}{1 + e^{X_i\beta}},
 $$
 
 as desired.

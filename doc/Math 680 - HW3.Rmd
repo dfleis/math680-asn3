@@ -126,6 +126,16 @@ Therefore, \begin{align*}
     &\implies (x-y)^T(u-v) \geq 0 \end{align*}
 as desired.
 
+## d)
+We wish to show 
+$$\text{prox}_t(x) = u \iff h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u), \quad \forall y.$$
+Recall that 
+$$\text{prox}_{t}(x) = \underset{u}{\text{argmin}} \frac{1}{2t}||x-u||^2_2 +h(u).$$
+If h is closed and convex, then the proximal mapping exists and is unique for all x. That is, it is closed and bounded, and is strongly convex. It follows, from these optimality conditions, that \begin{align*}
+u = \text{prox}_{t}(x) &\implies x-u \in \partial h(u) \\
+    &\implies h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u), \end{align*}
+as desired. 
+
 
 # 3. Properties of Lasso
 
@@ -152,5 +162,125 @@ This statement is implied by a). Both solutions have the same fitted values,
 $$\frac{1}{2} ||y-X \hat{\beta}||^2_2 = \frac{1}{2} ||y-X \hat{\gamma}||^2_2.$$
 They also attain the same optimal value, $c^*$. This implies that
 $$\lambda ||\hat{\beta}|| = \lambda ||\hat{\gamma}||$$ as desired.  
+
+# 4) Convergence Rate for Proximal Gradient Descent
+
+## a)
+We wish to show that
+$$s = G_t(x^{(i-1)}) - \nabla g(x^{(i-1)})$$
+is a subgradient of h evaluated at $x^{(i)}$. We recall that h is convex, but not necessarily differentiable. From Question 2d), we showed that 
+$$\text{prox}_t(x) = u \iff h(y) \geq h(u) + \frac{1}{t}(x-u)^T(y-u), \quad \forall y.$$
+In this case, \begin{align*}
+x^{(i)} &= \text{prox}_{t,h}(x^{(i-1)}-t \nabla g(x^{(i-1)})) \\
+    \iff h(y) &\geq h(x^{(i)}) + \frac{1}{t}(x^{(i-1)} -x^{(i)}-t \nabla g(x^{(i-1)}))^T(y-x^{(i)}) \\
+    &= h(x^{(i)}) + (G_t(x^{(i-1)}) - \nabla g(x^{(i-1)}))^T(y-x^{(i)}) \\
+    &= h(x^{(i)}) + s^T(y-x^{(i)})\end{align*}
+This implies that $s \in \partial h(x^{(i)})$, as desired. 
+
+## b) 
+We now wish to derive the following inequality
+$$f(x^{(i)}) \leq f(z) + G_t(x^{(i-1)})^T(x^{(i-1)} - z) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2.$$
+Recall that $f(x)$ is our objective function and can be written as
+$$f(x) = g(x) + h(x),$$
+where $g$ is convex, differentiable, with $\nabla g$ being Lipschitz, and $h$ is convex. Therefore, $f$ must also be convex. 
+By (A4), 
+$$ g(x^{(i)}) \leq g(x^{(i-1)}) - t \nabla g(x^{(i-1)})^TG_t(x^{(i-1)}) + \frac{t}{2}||G_t(x^{(i-1)})||^2_2.$$
+Furthermore, since $\nabla g$ is Lipschitz, \begin{align*}
+|| \nabla g(x^{(i-1)}) - g(x^{(i)}) || &\leq L ||x^{(i-1)} - x^{(i)}|| \\
+    &= \frac{1}{t}||x^{(i-1)} - x^{(i)}|| \\
+    &= ||G_t(x^{(i-1)})||. \end{align*}
+
+On the other hand, $s \in \partial h(x^{(i)})$, \begin{align*}
+&h(x^{(i-1)}) \geq h(x^{(i)}) + s^T(x^{(i-1)}-x^{(i)}) \\
+    &\iff h(x^{(i)}) < h(x^{(i-1)}) + G_t(x^{(i-1)}) - \nabla g(x^{(i-1)})^T(x^{(i)}-x^{(i-1)}). \end{align*}
+    
+With some rewritting and some rearranging, it follows that \begin{align*}
+f(x^{(i)}) &= g(x^{(i)}) + h(x^{(i)}) \\
+    &\leq h(x^{(i-1)}) + g(x^{(i-1)}) + G_t(x^{(i-1)}) - \nabla g(x^{(i-1)})^T(x^{(i)}-x^{(i-1)}) - t\nabla g(x^{(i-1)})G_t(x^{(i-1)}) + \frac{t}{2}||G_t(x^{(i-1)})||^2_2 \\
+    &\leq f(z) + G_t(x^{(i-1)})^T(x^{(i-1)} - z) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2 , \end{align*}
+
+for some $z \in \mathbb R^n$, as desired. 
+
+## c) 
+We now wish to show that the sequence $\{f(x^{(i)})\}$ is nonincreasing for $i=0,...,k.$ That is, 
+$$f(x^{(i)}) \leq f(x^{(i-1)}), \quad i=1,...,k.$$
+Recall the inequality from the previous question,
+$$f(x^{(i)}) \leq f(z) + G_t(x^{(i-1)})^T(x^{(i-1)} - z) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2, \quad z \in \mathbb R^n.$$
+If we let $z=x^{(i-1)}$, we see that \begin{align*}
+f(x^{(i)}) &\leq f(x^{(i-1)}) + G_t(x^{(i-1)})^T(x^{(i-1)} - x^{(i-1)}) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2 \\
+    &= f(x^{(i-1)}) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2. \end{align*}
+Note that $\frac{t}{2}||G_t(x^{(i-1)})||^2_2$ will always be positive unless $G_t(x^{(i-1)})=0.$ This implies that 
+$$f(x^{(i)}) \leq f(x^{(i-1)}), \quad i=1,...,k$$
+and so the sequence of objection function evaluations is nonincreasing. 
+
+## d)
+We will now derive the following inequality
+$$f(x^{(i)}) - f(x^*) \leq \frac{1}{2t}(||x^{(i-1)} - x^*||^2_2 - ||x^{(i)}-x^*||^2_2. $$
+Using the inequality derived above, and the fact that $f(x^{(i)}) \leq f(x^*)$,
+$$f(x^{(i)}) \leq f(x^*) + G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - \frac{t}{2}||G_t(x^{(i-1)})||^2_2$$ $$f(x^{(i)}) - f(x^*) \leq \frac{1}{2t}\{2t \cdot G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - t^2||G_t(x^{(i-1)})||^2_2$$
+$$f(x^{(i)}) - f(x^*) \leq \frac{1}{2t}\{2t \cdot G_t(x^{(i-1)})^T(x^{(i-1)} - x^*) - t^2||G_t(x^{(i-1)})||^2_2 - ||x^{(i-1)}-x^*||^2_2 +||x^{(i-1)}-x^*||^2_2\}.$$
+Notice that 
+$$||x^{(i-1)}-x^* - tG_t(x^{(i-1)})||^2_2 = ||x^{(i-1)}-x^*||^2_2 - 2t \cdot G_t(x^{(i-1)})^T(x^{(i-1)}-x^*) + t^2||G_t(x^{(i-1)})||^2_2.$$
+Therefore, we can write
+$$f(x^{(i)}) - f(x^*) \leq\{\ ||x^{(i-1)}-x^*||^2_2 - ||x^{(i-1)} - tG_t(x^{(i-1)}) -x^*||^2_2 \}.$$
+Furthermore, by definition, we have that $G_t(x^{(i-1)}) = \frac{1}{t}(x^{(i-1)} - x^{(i)})$ and so \begin{align*}
+f(x^{(i)}) - f(x^*) &\leq\{\ ||x^{(i-1)}-x^*||^2_2 - ||x^{(i-1)} - t(\frac{1}{t}(x^{(i-1)} - x^{(i)})) -x^*||^2_2 \} \\
+    &= ||x^{(i-1)}-x^*||^2_2 - ||x^{(i)}-x^*||^2_2, \end{align*}
+as desired. 
+
+## e)
+We will now show
+$$f(x^{(k)}) - f(x^*) \leq \frac{1}{2kt} ||x^{(0)}-x^*||^2_2.$$
+We begin with the result above, summing over all k iterations, \begin{align*}
+\sum_{i=1}^k f(x^{(i)}) - f(x^*) &\leq \sum_{i=1}^k \frac{1}{2t} (||x^{(i-1)}-x^*||^2_2 - ||x^{(i)}-x^*||^2_2) \\
+    &= \frac{1}{2t} (||x^{(0)}-x^*||^2_2 - ||x^{(k)}-x^*||^2_2) \\
+    &\leq \frac{1}{2t} (||x^{(0)}-x^*||^2_2). \end{align*}
+Since the sequence of objection function evaluations is nonincreasing, \begin{align*}
+f(x^{(k)}) - f(x^*) &\leq \frac{1}{k}\sum_{i=1}^k f(x^{(i)}) - f(x^*) \\
+    &\leq \frac{||x^{(0)} - x^* ||^2_2}{2kt} \end{align*}
+as desired. 
+
+## f)
+The method of selecting the step size according to backtracking line search consists of fixing some $0< \beta < 1$ and starting with $t=1$. Then, at each iteration, 
+$$f(x - t \nabla f(x)) > f(x) - \frac{t}{2}|| \nabla f(x)||^2_2,$$
+update $t= \beta t$. 
+Now, in the context of this problem, 
+$$f(x - t \nabla f(x)) > f(x) - \frac{t}{2}|| \nabla f(x)||^2_2,$$
+
+
+# 6) Practice with KKT Conditions and Duality
+
+We begin with the usual least squares problem, 
+$$\underset{\beta \in \mathbb R^p}{\text{min}} ||y-X\beta||^2_2.$$
+We begin by noting the primal of this problem is
+$$\underset{v \in \mathbb R^n}{min} \frac{1}{2}||v||^2_2 \quad \text{subject to} \; y=X \beta + v.$$
+We can now write the Lagrangian, 
+$$L(v, \beta, \lambda) = \frac{1}{2}||v||^2_2 +\lambda(y - X \beta - v).$$
+It follows that the first order necessary conditions are
+$$ \frac{\partial L}{\partial u} = v - \lambda = 0$$
+$$ \frac{\partial L}{\partial \beta} = -X\lambda = 0$$
+$$ \frac{\partial L}{\partial \lambda} = y-X\beta - v = 0.$$
+From the first partial derivative, we can see that we can simplify the Lagrangian since
+$$v = \lambda \quad \text{and} \quad v^Tv = v^T\lambda.$$
+We can now rewrite the Lagrangian as \begin{align*}
+L(v, \beta, \lambda) &= \frac{1}{2}||v||^2_2 +\lambda(y - X \beta - v) \\
+    &= \frac{1}{2}||v||^2_2 + \lambda y- \lambda u \\
+    &= \frac{1}{2}||v||^2_2 -v^Ty - ||v||^2_2 \\
+    &= ||y-v||^2_2. \end{align*}
+    
+Therefore, we conclude that the dual of the model can be written as 
+$$\underset{v \in \mathbb R^n}{min} ||y-v||^2_2 \quad \text{subject to} \; X^Tv=0,$$
+as desired. 
+
+
+
+
+
+
+
+
+
+
+
 
 
